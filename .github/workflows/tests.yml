@@ -1,0 +1,31 @@
+name: Tests
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m unittest discover -v
+      - run: python -m ai_commerce evaluate
+      - run: python -m ai_commerce discover --request examples/dual_monitor_dock.json
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose --profile test run --build --rm tests
+      - run: docker compose up --build --wait app
+      - run: curl --fail http://127.0.0.1:8000/health
+      - if: always()
+        run: docker compose down

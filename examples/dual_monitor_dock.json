@@ -1,0 +1,13 @@
+{
+  "category": "dock",
+  "budget_paise": 1000000,
+  "configuration": {
+    "host": "L42-r2",
+    "os": "ExampleOS-1",
+    "display_mode": "extended",
+    "resolution": "1080p60",
+    "cable_set": "reviewed-dual-hdmi",
+    "display_count": 2,
+    "driver_allowed": false
+  }
+}

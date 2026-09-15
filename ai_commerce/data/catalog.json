@@ -1,0 +1,584 @@
+{
+  "ontology_version": 1,
+  "products": [
+    {
+      "id": "wash-connect",
+      "category": "washing_machine",
+      "title": "Connect washing machine",
+      "source_ids": [
+        "wash-connect-manual-v1"
+      ],
+      "facts": [
+        {
+          "name": "built_in_wifi",
+          "value": true,
+          "evidence": [
+            "wash-connect-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        },
+        {
+          "name": "app_control",
+          "value": true,
+          "evidence": [
+            "wash-connect-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        }
+      ],
+      "assessments": []
+    },
+    {
+      "id": "wash-basic",
+      "category": "washing_machine",
+      "title": "Basic washing machine",
+      "source_ids": [
+        "wash-basic-manual-v1"
+      ],
+      "facts": [
+        {
+          "name": "built_in_wifi",
+          "value": false,
+          "evidence": [
+            "wash-basic-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        },
+        {
+          "name": "app_control",
+          "value": false,
+          "evidence": [
+            "wash-basic-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        }
+      ],
+      "assessments": []
+    },
+    {
+      "id": "wash-addon",
+      "category": "washing_machine",
+      "title": "Addon washing machine",
+      "source_ids": [
+        "wash-addon-manual-v1"
+      ],
+      "facts": [
+        {
+          "name": "built_in_wifi",
+          "value": false,
+          "evidence": [
+            "wash-addon-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        },
+        {
+          "name": "app_control",
+          "value": true,
+          "evidence": [
+            "wash-addon-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": [
+            "external_wifi_module"
+          ]
+        }
+      ],
+      "assessments": []
+    },
+    {
+      "id": "wash-pending",
+      "category": "washing_machine",
+      "title": "Pending washing machine",
+      "source_ids": [
+        "wash-pending-manual-v1"
+      ],
+      "facts": [],
+      "assessments": []
+    },
+    {
+      "id": "ac-connect",
+      "category": "ac",
+      "title": "Connect air conditioner",
+      "source_ids": [
+        "ac-connect-manual-v1"
+      ],
+      "facts": [
+        {
+          "name": "built_in_wifi",
+          "value": true,
+          "evidence": [
+            "ac-connect-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        },
+        {
+          "name": "app_control",
+          "value": true,
+          "evidence": [
+            "ac-connect-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        },
+        {
+          "name": "voice_control",
+          "value": true,
+          "evidence": [
+            "ac-connect-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": [
+            "ExampleVoice_account",
+            "DemoRegion"
+          ]
+        }
+      ],
+      "assessments": []
+    },
+    {
+      "id": "ac-local",
+      "category": "ac",
+      "title": "Local air conditioner",
+      "source_ids": [
+        "ac-local-manual-v1"
+      ],
+      "facts": [
+        {
+          "name": "built_in_wifi",
+          "value": false,
+          "evidence": [
+            "ac-local-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        },
+        {
+          "name": "app_control",
+          "value": false,
+          "evidence": [
+            "ac-local-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        }
+      ],
+      "assessments": []
+    },
+    {
+      "id": "ac-bridge",
+      "category": "ac",
+      "title": "Bridge air conditioner",
+      "source_ids": [
+        "ac-bridge-manual-v1"
+      ],
+      "facts": [
+        {
+          "name": "built_in_wifi",
+          "value": false,
+          "evidence": [
+            "ac-bridge-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": []
+        },
+        {
+          "name": "app_control",
+          "value": true,
+          "evidence": [
+            "ac-bridge-manual-v1"
+          ],
+          "ontology_version": 1,
+          "prerequisites": [
+            "external_bridge"
+          ]
+        }
+      ],
+      "assessments": []
+    },
+    {
+      "id": "dock-a",
+      "category": "dock",
+      "title": "DOCK-A laptop dock",
+      "source_ids": [
+        "dock-a-assessment-v1"
+      ],
+      "facts": [],
+      "assessments": [
+        {
+          "host": "L42-r2",
+          "os": "ExampleOS-1",
+          "display_mode": "extended",
+          "resolution": "1080p60",
+          "cable_set": "reviewed-dual-hdmi",
+          "display_count": 1,
+          "driver_required": false,
+          "evidence": [
+            "dock-a-assessment-v1"
+          ],
+          "version": "1"
+        }
+      ]
+    },
+    {
+      "id": "dock-b",
+      "category": "dock",
+      "title": "DOCK-B laptop dock",
+      "source_ids": [
+        "dock-b-assessment-v1"
+      ],
+      "facts": [],
+      "assessments": [
+        {
+          "host": "L42-r2",
+          "os": "ExampleOS-1",
+          "display_mode": "extended",
+          "resolution": "1080p60",
+          "cable_set": "reviewed-dual-hdmi",
+          "display_count": 2,
+          "driver_required": true,
+          "evidence": [
+            "dock-b-assessment-v1"
+          ],
+          "version": "1"
+        }
+      ]
+    },
+    {
+      "id": "dock-c",
+      "category": "dock",
+      "title": "DOCK-C laptop dock",
+      "source_ids": [
+        "dock-c-assessment-v1"
+      ],
+      "facts": [],
+      "assessments": [
+        {
+          "host": "L42-r2",
+          "os": "ExampleOS-1",
+          "display_mode": "extended",
+          "resolution": "1080p60",
+          "cable_set": "reviewed-dual-hdmi",
+          "display_count": 2,
+          "driver_required": false,
+          "evidence": [
+            "dock-c-assessment-v1"
+          ],
+          "version": "1"
+        }
+      ]
+    },
+    {
+      "id": "dock-d",
+      "category": "dock",
+      "title": "DOCK-D laptop dock",
+      "source_ids": [
+        "dock-d-assessment-v1"
+      ],
+      "facts": [],
+      "assessments": [
+        {
+          "host": "L42-r2",
+          "os": "ExampleOS-1",
+          "display_mode": "extended",
+          "resolution": "1080p60",
+          "cable_set": "reviewed-dual-hdmi",
+          "display_count": 2,
+          "driver_required": false,
+          "evidence": [
+            "dock-d-assessment-v1"
+          ],
+          "version": "1"
+        }
+      ]
+    },
+    {
+      "id": "dock-e",
+      "category": "dock",
+      "title": "DOCK-E laptop dock",
+      "source_ids": [
+        "dock-e-assessment-v1"
+      ],
+      "facts": [],
+      "assessments": []
+    }
+  ],
+  "sources": [
+    {
+      "id": "wash-connect-manual-v1",
+      "product_id": "wash-connect",
+      "text": "Built-in Wi-Fi and app control are included in this washing machine.",
+      "publisher": "Fictional manufacturer",
+      "locator": "synthetic://wash-connect-manual-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "wash-basic-manual-v1",
+      "product_id": "wash-basic",
+      "text": "This washing machine has no Wi-Fi and no app control.",
+      "publisher": "Fictional manufacturer",
+      "locator": "synthetic://wash-basic-manual-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "wash-addon-manual-v1",
+      "product_id": "wash-addon",
+      "text": "App control requires an external wifi module. Wi-Fi is not built in.",
+      "publisher": "Fictional manufacturer",
+      "locator": "synthetic://wash-addon-manual-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "wash-pending-manual-v1",
+      "product_id": "wash-pending",
+      "text": "Connectivity specifications are not reviewed. Built-in wifi and app control are unknown.",
+      "publisher": "Fictional manufacturer",
+      "locator": "synthetic://wash-pending-manual-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "ac-connect-manual-v1",
+      "product_id": "ac-connect",
+      "text": "Air conditioner with built-in Wi-Fi and app control. ExampleVoice voice control requires an ExampleVoice account in DemoRegion.",
+      "publisher": "Fictional manufacturer",
+      "locator": "synthetic://ac-connect-manual-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "ac-local-manual-v1",
+      "product_id": "ac-local",
+      "text": "Air conditioner with local remote only. No app control or built-in Wi-Fi.",
+      "publisher": "Fictional manufacturer",
+      "locator": "synthetic://ac-local-manual-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "ac-bridge-manual-v1",
+      "product_id": "ac-bridge",
+      "text": "Air conditioner app control requires an external bridge. No built-in Wi-Fi.",
+      "publisher": "Fictional manufacturer",
+      "locator": "synthetic://ac-bridge-manual-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "dock-a-assessment-v1",
+      "product_id": "dock-a",
+      "text": "Dock for laptop L42-r2 ExampleOS-1. Two extended monitor screen display connections requested. Review supports 1 independent 1080p60 displays. Driver required: False.",
+      "publisher": "Fictional review lab",
+      "locator": "synthetic://dock-a-assessment-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "dock-b-assessment-v1",
+      "product_id": "dock-b",
+      "text": "Dock for laptop L42-r2 ExampleOS-1. Two extended monitor screen display connections requested. Review supports 2 independent 1080p60 displays. Driver required: True.",
+      "publisher": "Fictional review lab",
+      "locator": "synthetic://dock-b-assessment-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "dock-c-assessment-v1",
+      "product_id": "dock-c",
+      "text": "Dock for laptop L42-r2 ExampleOS-1. Two extended monitor screen display connections requested. Review supports 2 independent 1080p60 displays. Driver required: False.",
+      "publisher": "Fictional review lab",
+      "locator": "synthetic://dock-c-assessment-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "dock-d-assessment-v1",
+      "product_id": "dock-d",
+      "text": "Dock for laptop L42-r2 ExampleOS-1. Two extended monitor screen display connections requested. Review supports 2 independent 1080p60 displays. Driver required: False.",
+      "publisher": "Fictional review lab",
+      "locator": "synthetic://dock-d-assessment-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    },
+    {
+      "id": "dock-e-assessment-v1",
+      "product_id": "dock-e",
+      "text": "Dock for laptop L42-r2 ExampleOS-1. Two extended monitor screen display connections requested. No reviewed exact configuration assessment is available.",
+      "publisher": "Fictional review lab",
+      "locator": "synthetic://dock-e-assessment-v1",
+      "version": "1",
+      "reviewed": true,
+      "active": true
+    }
+  ],
+  "offers": [
+    {
+      "id": "wash-connect-offer",
+      "product_id": "wash-connect",
+      "currency": "INR",
+      "price_paise": 3200000,
+      "accessories_paise": 0,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "wash-basic-offer",
+      "product_id": "wash-basic",
+      "currency": "INR",
+      "price_paise": 2100000,
+      "accessories_paise": 0,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "wash-addon-offer",
+      "product_id": "wash-addon",
+      "currency": "INR",
+      "price_paise": 2500000,
+      "accessories_paise": 100000,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "wash-pending-offer",
+      "product_id": "wash-pending",
+      "currency": "INR",
+      "price_paise": 2800000,
+      "accessories_paise": 0,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "ac-connect-offer",
+      "product_id": "ac-connect",
+      "currency": "INR",
+      "price_paise": 4200000,
+      "accessories_paise": 0,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "ac-local-offer",
+      "product_id": "ac-local",
+      "currency": "INR",
+      "price_paise": 3000000,
+      "accessories_paise": 0,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "ac-bridge-offer",
+      "product_id": "ac-bridge",
+      "currency": "INR",
+      "price_paise": 3500000,
+      "accessories_paise": 100000,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "dock-a-offer",
+      "product_id": "dock-a",
+      "currency": "INR",
+      "price_paise": 600000,
+      "accessories_paise": 80000,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "cable_set": "reviewed-dual-hdmi",
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "dock-b-offer",
+      "product_id": "dock-b",
+      "currency": "INR",
+      "price_paise": 700000,
+      "accessories_paise": 80000,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "cable_set": "reviewed-dual-hdmi",
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "dock-c-offer",
+      "product_id": "dock-c",
+      "currency": "INR",
+      "price_paise": 1100000,
+      "accessories_paise": 80000,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "cable_set": "reviewed-dual-hdmi",
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "dock-d-offer",
+      "product_id": "dock-d",
+      "currency": "INR",
+      "price_paise": 820000,
+      "accessories_paise": 80000,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "cable_set": "reviewed-dual-hdmi",
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    },
+    {
+      "id": "dock-e-offer",
+      "product_id": "dock-e",
+      "currency": "INR",
+      "price_paise": 750000,
+      "accessories_paise": 80000,
+      "shipping_paise": 20000,
+      "stock": 3,
+      "cable_set": "reviewed-dual-hdmi",
+      "valid_from": "2026-09-15T00:00:00+00:00",
+      "expires_at": "2026-09-15T00:30:00+00:00",
+      "delivery_at": "2026-09-15T20:00:00+00:00"
+    }
+  ]
+}
