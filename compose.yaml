@@ -1,5 +1,6 @@
 services:
   app:
+    image: ai-commerce:latest
     build: .
     ports:
       - "127.0.0.1:8000:8000"
@@ -16,6 +17,7 @@ services:
       retries: 3
       start_period: 5s
   tests:
+    image: ai-commerce:latest
     build: .
     profiles: ["test"]
     command: ["python", "-m", "unittest", "discover", "-v"]
