@@ -1,12 +1,6 @@
-"""Explicit in-memory schema evolution. Reviewer names are demo metadata, not auth."""
+"""In-memory schema migration demo, separate from request handling."""
 from dataclasses import dataclass
-
-
-@dataclass(frozen=True)
-class Definition:
-    name: str
-    kind: type
-    meaning: str
+from ai_commerce.request import Definition, FeatureRegistry
 
 
 @dataclass(frozen=True)
@@ -16,22 +10,7 @@ class Proposal:
     reviewer: str = ''
 
 
-class Ontology:
-    def __init__(self):
-        self.version = 1
-        self.definitions = {name: Definition(name, bool, meaning) for name, meaning in {
-            'built_in_wifi': 'Wi-Fi hardware is built in; no optional module required.',
-            'app_control': 'An app can control the appliance, possibly with prerequisites.',
-            'voice_control': 'Supports a named voice ecosystem; prerequisites must be checked.',
-            'remote_access': 'Can be controlled from outside the local network.',
-        }.items()}
-
-    def validate(self, name, value):
-        if name not in self.definitions:
-            raise ValueError(f'Unknown feature: {name}')
-        if type(value) is not self.definitions[name].kind:
-            raise ValueError(f'Invalid type for feature: {name}')
-
+class Ontology(FeatureRegistry):
     def approve(self, proposal):
         if not proposal.reviewer.strip():
             raise ValueError('Explicit named review is required')
@@ -47,11 +26,11 @@ class Ontology:
 
 
 def demo():
-    import json
-    from pathlib import Path
-    from .ingestion import Catalog
+    from ai_commerce.catalog import Catalog, load_catalog
     ontology = Ontology()
-    data = json.loads((Path(__file__).parent / 'data' / 'catalog.json').read_text())
+    original = load_catalog()
+    data = original.db.export()
+    original.close()
     ontology.approve(Proposal(1, Definition('energy_metering', bool,
         'Reports measured energy consumption in the app.'), 'Demo reviewer'))
     data['ontology_version'] = ontology.version
@@ -68,11 +47,14 @@ def demo():
     product['source_ids'].append(sid)
     product['facts'].append(dict(name='energy_metering', value=True,
         evidence=[sid], prerequisites=[], ontology_version=ontology.version))
-    catalog = Catalog(data, ontology=ontology)
-    verified = [pid for pid, p in catalog.products.items()
-                if catalog.graph.feature(p, 'energy_metering')['value'] is True]
-    return {'version': ontology.version, 'reviewer': 'Demo reviewer', 'persistent': False,
-            'backfilled_products': verified, 'evidence': catalog.sources[sid],
-            'regression': {'wifi_value_preserved': catalog.graph.feature(
-                catalog.products['wash-connect'], 'built_in_wifi')['value'] is True},
+    catalog = Catalog(data, features=ontology)
+    verified = [product['id'] for product in catalog.products()
+                if catalog.verified_feature(product, 'energy_metering')['value'] is True]
+    result = {'version': ontology.version, 'reviewer': 'Demo reviewer', 'persistent': False,
+            'backfilled_products': verified, 'evidence': catalog.source(sid),
+            'regression': {'wifi_value_preserved': catalog.verified_feature(
+                catalog.product('wash-connect'), 'built_in_wifi')['value'] is True},
             'retrieval': catalog.search('measured energy consumption')}
+
+    catalog.close()
+    return result

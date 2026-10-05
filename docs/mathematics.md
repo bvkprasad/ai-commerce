@@ -1,3 +1,5 @@
+> These algorithms are learning tools in `retrieval`, exercised by `experiments`. The application uses SQLite FTS5 search.
+
 # Retrieval internals
 
 ## Text and vocabulary
@@ -38,7 +40,7 @@ Train on original reviewed active sources, without chunk overlap or repeated tit
 
 Normalize each word vector, then pool its context dimensions weighted by text TF-IDF and normalize the pooled vector. For sources “red blue” and “red green”, window 1, red has two equal positive context weights; normalized values are 1/sqrt(2). Blue has a single unit red dimension.
 
-No separate hand-authored synonym training sentences are injected; all training text is visible in catalog.json, including the dock wording “monitor screen display”. Similar contexts can group antonyms too. Tiny PPMI cannot reliably interpret negation, prerequisites or unseen meaning.
+No separate hand-authored synonym training sentences are injected; all training text is stored in the sources table of the bundled SQLite fixture, including the dock wording “monitor screen display”. Similar contexts can group antonyms too. Tiny PPMI cannot reliably interpret negation, prerequisites or unseen meaning.
 
 ## BM25
 
@@ -65,4 +67,4 @@ These are hand-set weights, not probabilities or a cross-encoder. Ties use stabl
 
 ## Evaluation
 
-Run `python -m ai_commerce evaluate` to compare BM25, TF-IDF, PPMI, RRF and reranked retrieval. Deduplicate product IDs after chunk retrieval. Report Recall@3, full-ranking MRR and nDCG@3 (gain 2^grade-1; discount log2(rank+1)). Three visible hand-authored judgments are deliberately tiny and illustrative. They measure relevance, not commerce eligibility. Service tests separately enforce the expected eligibility outcomes. Use a larger held-out set before selecting model adapters or claiming improvement.
+Run `python -m experiments evaluate` to compare BM25, TF-IDF, PPMI, RRF and reranked retrieval. Deduplicate product IDs after chunk retrieval. Report Recall@3, full-ranking MRR and nDCG@3 (gain 2^grade-1; discount log2(rank+1)). Three visible hand-authored judgments are deliberately tiny and illustrative. They measure relevance, not commerce eligibility. Service tests separately enforce the expected eligibility outcomes. Use a larger held-out set before selecting model adapters or claiming improvement.

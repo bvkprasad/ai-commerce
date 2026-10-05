@@ -21,12 +21,15 @@ def metrics(ranking, judgments, k=3):
     return {'recall_at_k': recall, 'mrr': mrr, 'ndcg_at_k': dcg / ideal if ideal else 0}
 
 
-def evaluate(catalog):
+def evaluate(catalog, vocabulary_limit=500):
+    from retrieval.index import SearchIndex
+    products = {product['id']: product for product in catalog.products()}
+    index = SearchIndex(products, catalog.sources(), vocabulary_limit)
     report = {}
     for method in ('bm25', 'tfidf', 'ppmi', 'hybrid', 'reranked'):
         rows = []
         for query, judgments in JUDGMENTS:
-            ranking = [x['product_id'] for x in catalog.search(query, method=method, limit=100)]
+            ranking = [x['product_id'] for x in index.search(query, method=method, limit=100)]
             rows.append({'query': query, **metrics(ranking, judgments)})
         report[method] = {'queries': rows, 'mean': {key: sum(r[key] for r in rows) / len(rows)
                             for key in ('recall_at_k', 'mrr', 'ndcg_at_k')}}

@@ -1,2 +1,2 @@
-"""AI Commerce: a synthetic, educational shopping assistant."""
-__version__ = '0.1.0'
+"""Request-serving application for the fictional commerce catalog."""
+__version__ = "0.1.0"

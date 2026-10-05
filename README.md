@@ -1,78 +1,142 @@
 # AI Commerce
 
-Explainable feature discovery, product comparison and configuration-specific compatibility, implemented in Python from first principles. **All products, evidence and prices are fictional. This is an educational local application, not a production shopping service.** Apache-2.0; the original license is preserved.
+A local application for discovering and comparing products using reviewed facts, configuration requirements, and offer costs. The bundled products, evidence, and prices are fictional.
+
+## Project layout
+
+| Package | Responsibility |
+| --- | --- |
+| `ai_commerce` | Serve requests, validate the catalog, interpret queries, check requirements, and return product cards |
+| `retrieval` | Educational retrieval algorithms used by experiments |
+| `experiments` | Optional retrieval evaluation and feature-schema migration demos |
+
+Application files:
+
+| File | Purpose |
+| --- | --- |
+| `__init__.py` | Marks the directory as a Python package and exposes its version |
+| `__main__.py` | Starts the API server when you run `python -m ai_commerce` |
+| `api.py` | Handles HTTP routes, reads JSON, and sends responses |
+| `request.py` | Defines supported features, validates requests, interprets simple queries, and checks offers |
+| `catalog.py` | Reads SQLite records and checks reviewed facts and configurations |
+| `storage.py` | Validated database records, SQLite transactions, and full-text search |
+| `llm.py` | OpenRouter calls and validated natural-language requirement extraction |
+| `service.py` | Applies discovery and comparison rules and builds product responses |
+
+`data/catalog.sqlite3` is a bundled fictional SQLite fixture. The running application stores and queries its data in an in-memory SQLite database. The JSON catalog file has been removed. Changes disappear on restart.
 
 ## Run locally
 
-Python 3.10+ is the only runtime dependency. No API keys, embedding downloads, NumPy, databases or framework installation are needed. From the repository directory:
+Local development uses Python 3.13, selected in `.python-version`. The package supports Python 3.10+. The API uses FastAPI, Pydantic, Uvicorn, SQLite, and HTTPX. An OpenRouter key is optional; without one, structured discovery and the local query grammar work.
 
 ```bash
-python -m unittest discover -v
-python -m ai_commerce discover --request examples/wifi_washer.json
-python -m ai_commerce discover --request examples/dual_monitor_dock.json
-python -m ai_commerce discover --request examples/smart_ac.json
-python -m ai_commerce discover --query 'Find a washing machine with built-in Wi-Fi under INR 40,000'
-python -m ai_commerce compare wash-connect wash-basic wash-pending
-python -m ai_commerce search 'two monitor laptop dock' --method hybrid
-python -m ai_commerce evaluate
-python -m ai_commerce ontology-demo
-python -m ai_commerce serve
+# macOS, if a suitable Python is not already installed
+brew install python@3.13
+
+python3.13 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[test]"
+python -m ai_commerce
 ```
 
-Optional package installation: `python -m pip install .` adds the `ai-commerce` command. Packaging uses setuptools at build time; there are no third-party runtime dependencies. Use `--vocabulary-limit 1000` before the subcommand to change the default cap of 500. Only actual corpus words are included.
+For later terminal sessions, run `source .venv/bin/activate` from the project directory. Within this environment, `python` and `python3` use Python 3.13. You can also use `.venv/bin/python` directly.
 
-## Docker Compose
+The API listens at `http://127.0.0.1:8000`. Installation also provides `ai-commerce`, which starts the same server with no arguments. Discovery, comparison, and search use the HTTP endpoints below.
 
-Install Docker with its Compose plugin, then run:
+For the listen address, set `AI_COMMERCE_HOST` or `AI_COMMERCE_PORT` when needed. Docker sets the host to `0.0.0.0` so its published port works.
+
+Run tests with `python -m unittest discover -v`. HTTP tests use FastAPI’s TestClient.
+
+## API
+
+| Method and path | JSON body | Result |
+| --- | --- | --- |
+| GET /health | None | Health check |
+| POST /discover | Structured request or `{"query":"Find an AC with smart control"}` | Eligible product cards or clarification |
+| POST /compare | `{"product_ids":["wash-connect","wash-basic"]}` | Product facts, prerequisites, offer costs, and evidence |
+| POST /search | `{"query":"wifi washer","category":"washing_machine"}` | Evidence matches; eligibility is not checked |
 
 ```bash
-docker compose up --build -d
 curl http://127.0.0.1:8000/health
 curl -X POST http://127.0.0.1:8000/discover \
   -H 'Content-Type: application/json' \
   --data-binary @examples/wifi_washer.json
-docker compose exec app python -m ai_commerce discover --request examples/dual_monitor_dock.json
+```
+
+POST bodies must be JSON objects with Content-Type application/json, at most 16 KiB. Queries are limited to 2,000 characters. Pydantic rejects unknown fields and invalid types with HTTP 422; invalid commerce requirements return HTTP 400. Error responses use a `detail` field. Content-Length is optional; chunked requests are also accepted.
+
+Interactive API documentation is available at `http://127.0.0.1:8000/docs`, with the OpenAPI schema at `/openapi.json`.
+
+Discovery accepts `query`, `category` (`washing_machine`, `ac`, or `dock`), `features`, `budget_paise`, `delivery_by`, `configuration`, and `confirmed_prerequisites`. Money is integer INR paise: INR 10,000 is `1000000`. Budget includes required accessories and shipping. Delivery timestamps must include a timezone.
+
+Discovery checks facts and prerequisites before returning products. Missing or conflicting evidence remains unknown. Dock compatibility requires an exact reviewed host, OS, display configuration, and cable set. The dock example returns dock-d at INR 9,200 including accessories and shipping.
+
+Without OpenRouter, English parsing supports a small local grammar. When configured, OpenRouter extracts natural-language requirements using a validated schema. Ambiguous or unsupported requirements should produce clarification; model understanding is not guaranteed. Use structured fields for precise requirements.
+
+## Enable OpenRouter
+
+```bash
+cp .env.example .env
+```
+
+Set `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in `.env`, then restart `python -m ai_commerce`. Choose a model that supports [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs). `.env` is ignored by Git and Docker; Compose forwards the configured values at runtime. Environment variables take precedence over `.env` values.
+
+Try a query such as:
+
+```bash
+curl -X POST http://127.0.0.1:8000/discover \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"I need a washer with built-in Wi-Fi for less than forty thousand rupees"}'
+```
+
+Only requests containing a query make a model call. It extracts requirements; SQLite and local commerce checks establish facts, compatibility, stock, and prices. Confirmed prerequisites are never supplied by the model. Model failures return HTTP 502; structured requests still work. `/health` reports the configured language-understanding mode.
+
+## Understand the catalog
+
+`Catalog` provides database methods rather than dictionaries. `EvidenceChecks` has been removed; `catalog.verified_feature()` and `catalog.compatibility()` resolve reviewed records directly.
+
+```python
+from ai_commerce.catalog import load_catalog
+
+catalog = load_catalog()
+try:
+    washer = catalog.product("wash-connect")
+    print(catalog.verified_feature(washer, "built_in_wifi"))
+    catalog.update("offers", "wash-connect", stock=0)
+finally:
+    catalog.close()
+```
+
+A feature is verified only when active reviewed sources agree. Missing or conflicting evidence is unknown. Compatibility requires an exact reviewed setup. See [architecture and evidence examples](docs/architecture.md) for the complete explanation.
+
+Application search uses [SQLite FTS5](https://www.sqlite.org/fts5.html). This version does not require pretrained embeddings or a vector database. OpenRouter integration uses one direct HTTP call, so no agent orchestration framework is needed.
+
+## Optional learning tools
+
+These commands are separate from the application:
+
+```bash
+python -m experiments evaluate
+python -m experiments ontology-demo
+```
+
+Installation also provides `ai-commerce-experiments`. The learning package supports BM25, TF-IDF, PPMI, hybrid rank fusion, and reranking. The application uses SQLite FTS5 with built-in BM25; `/search` accepts only `query` and optional `category`, with no algorithm selection. `--vocabulary-limit` (before the command) accepts 1–1,000, with a default of 500.
+
+See [retrieval mathematics](docs/mathematics.md) and [application architecture](docs/architecture.md). The evaluation uses three synthetic queries; it is a learning exercise. The schema migration demo changes only its own in-memory catalog.
+
+## Docker
+
+```bash
+docker compose up --build -d
+curl http://127.0.0.1:8000/health
 docker compose --profile test run --build --rm tests
-docker compose logs app
 docker compose down
 ```
 
-Compose includes the API and an optional test-runner service. There are no external service dependencies for this phase: JSON catalog, dictionary vectors/postings, and adjacency-list evidence graph all live in the process. The image contains Python and the source; image building requires internet access to pull the base image. No database volume is required. The API port binds to localhost on your computer. The container runs as a non-root user. Data is in memory; restarting resets the demo and creates fresh fictional offers.
+The container runs as a non-root user and binds the API port to localhost. No external database or persistent volume is required.
 
-## API
+## Limits
 
-| Method and path | JSON body | Behavior |
-| --- | --- | --- |
-| GET /health | None | Health check |
-| POST /discover | Structured request or `{"query":"Find an AC with smart control"}` | Eligible product cards or clarification |
-| POST /compare | `{"product_ids":["wash-connect","wash-basic"]}` | Facts, prerequisites, offer costs and evidence references |
-| POST /search | `{"query":"wifi washer","method":"hybrid"}` | Retrieval evidence only; eligibility is not checked |
+This application uses Uvicorn to serve a FastAPI application with fictional data. It has no authentication, live inventory, ordering, or shipping integration. Bundled offers last 30 minutes from startup; restarting creates fresh fictional offers. External catalogs retain their supplied timestamps. Search scores rank evidence and do not prove product eligibility.
 
-POST bodies must be JSON objects with Content-Type application/json and Content-Length, at most 16 KiB. Unsupported fields and wrong types are rejected. Text queries are limited to 2,000 characters. The WSGI server is for local demonstrations, with no authentication or production request concurrency guarantees.
-
-Structured discovery fields: `query`, `category` (washing_machine/ac/dock), `features`, `budget_paise`, `delivery_by` (ISO timestamp with timezone), `configuration`, `confirmed_prerequisites`. Budget includes product, required accessories and shipping. Example: INR 10,000 is `1000000` paise. The CLI helper `domain.paise` uses Decimal to avoid floating-point money conversion.
-
-The dock example fixes host revision L42-r2, ExampleOS-1, two extended 1080p60 displays and reviewed-dual-hdmi cables; drivers are forbidden. Only dock-d passes, with INR 8,200 + 800 + 200 = **9,200**. Add an explicit `delivery_by` timestamp to enforce a deadline. The canned example omits a date so it stays runnable.
-
-## Learning order
-
-1. `text.py`: original-word chunks, overlap, tokenizer and bounded vocabulary.
-2. `vectors.py`: dictionary dot product, normalization, TF-IDF and word-context PPMI.
-3. `search.py`: inverted BM25 term contributions, exact scan, rank fusion and transparent reranker.
-4. `ingestion.py`: typed release validation and index construction.
-5. `ontology.py` and `graph.py`: governed concept definitions and evidence-backed facts.
-6. `domain.py`: typed requests, timestamps, integer money and commerce constraints.
-7. `intent.py` and `service.py`: conservative parsing, eligibility and grounded response validation.
-8. `evaluation.py` and tests: hand-checked math, negative cases and algorithm comparison.
-
-See [mathematics](docs/mathematics.md) and [architecture](docs/architecture.md) for internals and extension points.
-
-## Scope and limitations
-
-Relevance is separate from verified eligibility, which is separate from purchasability. Hard requirements never become ranking bonuses. Missing, withdrawn, unreviewed or conflicting evidence is UNKNOWN; verified false is distinct. Driver permission does not prove installation. External bridge/module, voice account and region prerequisites must be explicitly confirmed.
-
-English interpretation supports a small grammar. “Smart”, relative delivery dates, negation, and unparsed requirements ask for clarification. Use structured fields for exact configuration and negative feature requirements. It does not understand arbitrary language. Category-wide discovery enumerates this small catalog to avoid losing eligible items to retrieval cutoffs; retrieval scores only order eligible results.
-
-The bundled fixture generates 30-minute offers when loaded; external `--catalog` files keep their supplied timestamps and never silently refresh. There are no real inventory, shipping or order integrations. Product comparisons do not assert compatibility without a supplied configuration.
-
-PPMI is a small distributional baseline, not a pretrained embedding. It cannot establish negation or compatibility. Evaluation has three hand-authored synthetic queries and is not held-out validation. Hybrid retrieval need not outperform lexical baselines. Ontology governance is in memory and the reviewer name is not authenticated identity. Persistent versioning, authorization, real reviewed ingestion, live commerce and controlled actions are future phases.
+Apache-2.0; the original license is preserved.

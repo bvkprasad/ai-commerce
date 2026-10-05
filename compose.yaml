@@ -1,6 +1,9 @@
 services:
   app:
     build: .
+    environment:
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
     ports:
       - "127.0.0.1:8000:8000"
     init: true

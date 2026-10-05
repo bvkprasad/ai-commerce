@@ -1,9 +1,9 @@
 import math
 import unittest
-from ai_commerce.text import tokenize, chunk_source, vocabulary
-from ai_commerce.vectors import TFIDF, PPMI, cosine, dot, normalize
-from ai_commerce.search import BM25, exact_scan, rrf, rerank_features
-from ai_commerce.evaluation import metrics
+from retrieval.text import tokenize, chunk_source, vocabulary
+from retrieval.vectors import TFIDF, PPMI, cosine, dot, normalize
+from retrieval.search import BM25, exact_scan, rrf, rerank_features
+from experiments.evaluation import metrics
 
 
 class RetrievalTests(unittest.TestCase):

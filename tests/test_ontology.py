@@ -1,5 +1,5 @@
 import unittest
-from ai_commerce.ontology import Ontology, Definition, Proposal
+from experiments.ontology import Ontology, Definition, Proposal
 
 
 class OntologyTests(unittest.TestCase):
@@ -24,7 +24,7 @@ class OntologyTests(unittest.TestCase):
             Ontology().approve(Proposal(1,Definition('built_in_wifi',str,'Changed meaning'),'Reviewer'))
 
     def test_demo_backfills_and_rebuilds(self):
-        from ai_commerce.ontology import demo
+        from experiments.ontology import demo
         result=demo()
         self.assertEqual(result['backfilled_products'],['wash-connect'])
         self.assertTrue(result['regression']['wifi_value_preserved'])

@@ -3,9 +3,9 @@ import json
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from ai_commerce.ingestion import load_catalog, Catalog
+from ai_commerce.catalog import load_catalog, Catalog
 from ai_commerce.service import CommerceService
-from ai_commerce.domain import Request, paise
+from ai_commerce.request import Request, paise
 
 NOW=datetime(2026,9,15,tzinfo=timezone.utc)
 ROOT=Path(__file__).resolve().parents[1]
@@ -14,6 +14,7 @@ ROOT=Path(__file__).resolve().parents[1]
 class ServiceTests(unittest.TestCase):
     def setUp(self):
         self.catalog=load_catalog(now=NOW)
+        self.addCleanup(self.catalog.close)
         self.service=CommerceService(self.catalog,clock=lambda:NOW)
         self.wifi={'category':'washing_machine','features':{'built_in_wifi':True}}
         self.dock=json.loads((ROOT/'examples/dual_monitor_dock.json').read_text())
@@ -29,17 +30,17 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(set(self.ids(request)),{'wash-basic','wash-addon'})
 
     def test_conflicting_evidence(self):
-        product=self.catalog.products['wash-connect']
+        product=self.catalog.product('wash-connect')
         fact=copy.deepcopy(product['facts'][0]);fact['value']=False
-        product['facts'].append(fact)
+        self.catalog.update('products', 'wash-connect', facts=product['facts'] + [fact])
         self.assertEqual(self.ids(self.wifi),[])
 
     def test_withdrawal(self):
-        self.catalog.sources['wash-connect-manual-v1']['active']=False
+        self.catalog.update('sources', 'wash-connect-manual-v1', active=False)
         self.assertEqual(self.ids(self.wifi),[])
 
     def test_wrong_product_evidence_rejected(self):
-        data=json.loads((ROOT/'ai_commerce/data/catalog.json').read_text())
+        data=self.catalog.db.export()
         data['products'][0]['facts'][0]['evidence']=['wash-basic-manual-v1']
         with self.assertRaises(ValueError): Catalog(data)
 
@@ -72,7 +73,7 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(self.ids(self.dock),[])
 
     def test_cables_must_match_offer(self):
-        self.catalog.offers['dock-d']['cable_set']='other'
+        self.catalog.update('offers', 'dock-d', cable_set='other')
         self.assertEqual(self.ids(self.dock),[])
 
     def test_delivery_deadline(self):
@@ -84,11 +85,11 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(self.ids(self.wifi),[])
 
     def test_out_of_stock(self):
-        self.catalog.offers['wash-connect']['stock']=0
+        self.catalog.update('offers', 'wash-connect', stock=0)
         self.assertEqual(self.ids(self.wifi),[])
 
     def test_missing_offer(self):
-        del self.catalog.offers['wash-connect']
+        self.catalog.delete_offer('wash-connect')
         self.assertEqual(self.ids(self.wifi),[])
 
     def test_smart_clarification(self):
@@ -120,11 +121,12 @@ class ServiceTests(unittest.TestCase):
         card=self.service.discover(self.wifi)['cards'][0]
         card['commerce']['total_paise']=1
         with self.assertRaises(ValueError):
-            self.service.validate_card(card,Request.parse(self.wifi,self.catalog.ontology),NOW)
+            self.service.validate_card(card,Request.parse(self.wifi,self.catalog.features),NOW)
 
-    def test_graph_provenance_path(self):
-        edge=next(target for relation,target in self.catalog.graph.edges['product:wash-connect'] if relation=='HAS_FEATURE')
-        self.assertEqual(self.catalog.graph.edges[edge],[('SUPPORTED_BY','source:wash-connect-manual-v1')])
+    def test_feature_evidence_reference(self):
+        product = self.catalog.product('wash-connect')
+        fact = self.catalog.verified_feature(product, 'built_in_wifi')
+        self.assertEqual(fact['evidence'], ['wash-connect-manual-v1'])
 
     def test_money(self):
         self.assertEqual(paise('9200.25'),920025)
@@ -135,9 +137,10 @@ class ServiceTests(unittest.TestCase):
         card=self.service.discover(self.wifi)['cards'][0]
         card['evidence']={}
         with self.assertRaises(ValueError):
-            self.service.validate_card(card,Request.parse(self.wifi,self.catalog.ontology),NOW)
+            self.service.validate_card(card,Request.parse(self.wifi,self.catalog.features),NOW)
 
     def test_external_catalog_does_not_refresh_offers(self):
-        catalog=load_catalog(ROOT/'ai_commerce/data/catalog.json',now=NOW+timedelta(days=1))
+        catalog=load_catalog(ROOT/'ai_commerce/data/catalog.sqlite3',now=NOW+timedelta(days=1))
+        self.addCleanup(catalog.close)
         service=CommerceService(catalog,clock=lambda:NOW+timedelta(days=1))
         self.assertEqual(service.discover(self.wifi)['cards'],[])
