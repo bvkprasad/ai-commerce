@@ -1,5 +1,6 @@
 services:
   app:
+    image: ai-commerce:latest
     build: .
     environment:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
@@ -19,6 +20,7 @@ services:
       retries: 3
       start_period: 5s
   tests:
+    image: ai-commerce:latest
     build: .
     profiles: ["test"]
     command: ["python", "-m", "unittest", "discover", "-v"]
